@@ -169,6 +169,24 @@ class SteamClient:
 
         return response
 
+    def fetch_game_market_listings(self, game: GameOptions, sort_dir: str = 'asc') -> dict:
+        if sort_dir not in ['asc', 'desc']:
+            raise ValueError("Invalid value for sort_dir. Allowed values are 'asc' and 'desc'.")
+        url = f'{SteamUrl.COMMUNITY_URL}/market/search/render/'
+        params = {
+            'query': '',
+            'search_descriptions': 0,
+            'sort_column': 'price',
+            'sort_dir': 'asc',
+            'appid': game.app_id,
+            'norender': 1
+        }
+        response = self._session.get(url, params=params)
+        if response.status_code != 200:
+            raise ApiException(
+                f'Failed to fetch market listings. Status code: {response.status_code}, Response: {response.text}')
+        return response.json()
+
     @staticmethod
     def is_invalid_api_key(response: requests.Response) -> bool:
         msg = 'Access is denied. Retrying will not help. Please verify your <pre>key=</pre> parameter'
