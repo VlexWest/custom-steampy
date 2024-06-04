@@ -177,7 +177,7 @@ class SteamClient:
             'query': '',
             'search_descriptions': 0,
             'sort_column': 'price',
-            'sort_dir': 'asc',
+            'sort_dir': sort_dir,
             'appid': game.app_id,
             'norender': 1
         }
