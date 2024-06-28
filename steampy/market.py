@@ -2,7 +2,6 @@ import json
 import urllib.parse
 from decimal import Decimal
 from http import HTTPStatus
-
 from requests import Session
 
 from steampy.confirmation import ConfirmationExecutor
@@ -31,7 +30,7 @@ class SteamMarket:
         self.was_login_executed = True
 
     def fetch_price(
-        self, item_hash_name: str, game: GameOptions, currency: Currency = Currency.USD, country='PL'
+            self, item_hash_name: str, game: GameOptions, currency: Currency = Currency.USD, country='PL'
     ) -> dict:
         url = f'{SteamUrl.COMMUNITY_URL}/market/priceoverview/'
         params = {
@@ -57,6 +56,20 @@ class SteamMarket:
             raise TooManyRequests('You can fetch maximum 20 prices in 60s period')
 
         return response.json()
+
+    @login_required
+    def get_market_listings(self, game: GameOptions, start_from: int = 1000, country='PL') -> dict:
+        params = {
+            'country': country,
+            'appid': game.app_id,
+        }
+        url = f'{SteamUrl.COMMUNITY_URL}/market/search/render/?query=&appid={game.app_id}&norender=1&count=100&sort_column=price&sort_dir=asc&start={start_from}&l=english'
+        response = self._session.get(url, params=params)
+        if response.status_code != HTTPStatus.OK:
+            raise ApiException(f'There was a problem getting the listings. HTTP code: {response.status_code}')
+        response_json = response.json()
+        market_listings = response_json['results']
+        return market_listings
 
     @login_required
     def get_my_market_listings(self) -> dict:
@@ -131,12 +144,12 @@ class SteamMarket:
 
     @login_required
     def create_buy_order(
-        self,
-        market_name: str,
-        price_single_item: str,
-        quantity: int,
-        game: GameOptions,
-        currency: Currency = Currency.USD,
+            self,
+            market_name: str,
+            price_single_item: str,
+            quantity: int,
+            game: GameOptions,
+            currency: Currency = Currency.USD,
     ) -> dict:
         data = {
             'sessionid': self._session_id,
@@ -151,23 +164,17 @@ class SteamMarket:
         }
 
         response = self._session.post(f'{SteamUrl.COMMUNITY_URL}/market/createbuyorder/', data, headers=headers).json()
-
-        if (success := response.get('success')) != 1:
-            raise ApiException(
-                f'There was a problem creating the order. Are you using the right currency? success: {success}'
-            )
-
         return response
 
     @login_required
     def buy_item(
-        self,
-        market_name: str,
-        market_id: str,
-        price: int,
-        fee: int,
-        game: GameOptions,
-        currency: Currency = Currency.USD,
+            self,
+            market_name: str,
+            market_id: str,
+            price: int,
+            fee: int,
+            game: GameOptions,
+            currency: Currency = Currency.USD,
     ) -> dict:
         data = {
             'sessionid': self._session_id,

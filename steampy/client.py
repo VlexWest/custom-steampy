@@ -1,11 +1,12 @@
-import re
 import bs4
 import json
-import urllib.parse as urlparse
-from urllib.parse import unquote
-from typing import List, Union
-from decimal import Decimal
+import re
 import requests
+import urllib.parse as urlparse
+from decimal import Decimal
+from typing import List, Union
+from urllib.parse import unquote
+
 from steampy import guard
 from steampy.confirmation import ConfirmationExecutor
 from steampy.exceptions import SevenDaysHoldException, ApiException, TooManyRequests
@@ -453,7 +454,8 @@ class SteamClient:
 
     @login_required
     # If convert_to_decimal = False, the price will be returned WITHOUT a decimal point.
-    def get_wallet_balance(self, convert_to_decimal: bool = True, on_hold: bool = False) -> Union[str, Decimal]:
+    def get_wallet_balance(self, convert_to_decimal: bool = False, on_hold: bool = False) -> Union[
+        dict, Decimal]:
         response = self._session.get(f'{SteamUrl.COMMUNITY_URL}/market')
         wallet_info_match = re.search(r'var g_rgWalletInfo = (.*?);', response.text)
         if wallet_info_match:
@@ -465,7 +467,10 @@ class SteamClient:
         if convert_to_decimal:
             return Decimal(balance_dict[balance_dict_key]) / 100
         else:
-            return balance_dict[balance_dict_key]
+            return {
+                "balance": int(balance_dict[balance_dict_key]),
+                "currency": balance_dict['wallet_currency']
+            }
 
     def clear_session_cookies(self):
         self._session.cookies.clear_session_cookies()
