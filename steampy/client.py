@@ -5,6 +5,7 @@ import requests
 import urllib.parse as urlparse
 from decimal import Decimal
 from typing import List, Union
+from typing import Optional
 from urllib.parse import unquote
 
 from steampy import guard
