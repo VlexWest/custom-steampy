@@ -418,13 +418,14 @@ class SteamClient:
             trade_offer_url: str,
             message: str = '',
             case_sensitive: bool = True,
+            language: Optional[str] = "english",
     ) -> dict:
         token = get_key_value_from_url(trade_offer_url, 'token', case_sensitive)
         partner_account_id = get_key_value_from_url(trade_offer_url, 'partner', case_sensitive)
         partner_steam_id = account_id_to_steam_id(partner_account_id)
         offer = self._create_offer_dict(items_from_me, items_from_them)
         session_id = self._get_session_id()
-        url = f'{SteamUrl.COMMUNITY_URL}/tradeoffer/new/send'
+        url = f'{SteamUrl.COMMUNITY_URL}/tradeoffer/new/send?l={language}'
         server_id = 1
         trade_offer_create_params = {'trade_offer_access_token': token}
         params = {
