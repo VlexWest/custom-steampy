@@ -383,6 +383,13 @@ class SteamClient:
         data = response.json()
         return data['response']['players'][0]
 
+    def get_profiles(self, steam_ids: list[str]) -> list[dict]:
+        steam_ids = ','.join(steam_ids)
+        params = {'steamids': steam_ids, 'key': self._api_key}
+        response = self.api_call('GET', 'ISteamUser', 'GetPlayerSummaries', 'v0002', params)
+        data = response.json()
+        return data['response']['players']
+
     def get_friend_list(self, steam_id: str, relationship_filter: str = 'all') -> dict:
         params = {'key': self._api_key, 'steamid': steam_id, 'relationship': relationship_filter}
         resp = self.api_call('GET', 'ISteamUser', 'GetFriendList', 'v1', params)
