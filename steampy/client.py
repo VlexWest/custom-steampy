@@ -481,5 +481,39 @@ class SteamClient:
                 "currency": balance_dict['wallet_currency']
             }
 
+    @login_required
+    def activate_wallet_code(self, code: str) -> dict:
+        # Now, redeem wallet code with POST
+        data = {
+            'wallet_code': code,
+            'sessionid': self._get_session_id(),
+        }
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0",
+            "Accept": "text/javascript, text/html, application/xml, text/xml, */*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-Prototype-Version": "1.7",
+            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-KL-Ajax-Request": "Ajax_Request",
+            "Origin": SteamUrl.STORE_URL,
+            "Connection": "keep-alive",
+            "Referer": f"{SteamUrl.STORE_URL}/account/redeemwalletcode",
+        }
+
+        cookies = {
+            'sessionid': self._get_session_id(),
+            "timezoneOffset": "3600,0",
+        }
+
+        response = self._session.post(
+            f'{SteamUrl.STORE_URL}/account/ajaxredeemwalletcode/',
+            data=data,
+            headers=headers,
+            cookies=cookies
+        )
+        return response.json()
+
     def clear_session_cookies(self):
         self._session.cookies.clear_session_cookies()
