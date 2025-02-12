@@ -140,10 +140,16 @@ class LoginExecutor:
         pool_data = {'client_id': client_id, 'request_id': request_id}
         response = self._api_call('POST', 'IAuthenticationService', 'PollAuthSessionStatus', params=pool_data)
         self.refresh_token = response.json()['response']['refresh_token']
-
-    def _finalize_login(self) -> Response:
-        sessionid = self.session.cookies['sessionid']
-        redir = f'{SteamUrl.COMMUNITY_URL}/login/home/?goto='
-        finalized_data = {'nonce': self.refresh_token, 'sessionid': sessionid, 'redir': redir}
-        response = self.session.post(SteamUrl.LOGIN_URL + '/jwt/finalizelogin', data=finalized_data)
-        return response
+    
+    def _finalize_login(self, proxies: dict | None = None) -> requests.Response:
+        redir = "https://steamcommunity.com/login/home/?goto="
+        files = {
+            'nonce': (None, self.refresh_token),
+            'sessionid': (None, sessionid),
+            'redir': (None, redir)
+        }
+        headers = {
+            'Referer': redir,
+            'Origin': 'https://steamcommunity.com'
+        }
+        return self.session.post("https://login.steampowered.com/jwt/finalizelogin", headers=headers, files=files)
