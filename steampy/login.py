@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from base64 import b64encode
 from http import HTTPStatus
-from typing import TYPE_CHECKING
-
 from rsa import PublicKey, encrypt
+from typing import TYPE_CHECKING
 
 from steampy import guard
 from steampy.exceptions import ApiException, CaptchaRequired, InvalidCredentials
@@ -24,7 +23,8 @@ class LoginExecutor:
         self.session = session
         self.refresh_token = ''
 
-    def _api_call(self, method: str, service: str, endpoint: str, version: str = 'v1', params: dict | None = None) -> Response:
+    def _api_call(self, method: str, service: str, endpoint: str, version: str = 'v1',
+                  params: dict | None = None) -> Response:
         url = f'{SteamUrl.API_URL}/{service}/{endpoint}/{version}'
         # All requests from the login page use the same 'Referer' and 'Origin' values
         headers = {'Referer': f'{SteamUrl.COMMUNITY_URL}/', 'Origin': SteamUrl.COMMUNITY_URL}
@@ -128,7 +128,7 @@ class LoginExecutor:
                 key: (None, str(value))
                 for key, value in pass_data['params'].items()
             }
-            self.session.post(pass_data['url'], files = multipart_fields)
+            self.session.post(pass_data['url'], files=multipart_fields)
 
     def _update_steam_guard(self, login_response: Response) -> None:
         client_id = login_response.json()['response']['client_id']
@@ -163,4 +163,4 @@ class LoginExecutor:
             'Referer': redir,
             'Origin': 'https://steamcommunity.com'
         }
-        return self.session.post("https://login.steampowered.com/jwt/finalizelogin", headers = headers, files = files)
+        return self.session.post("https://login.steampowered.com/jwt/finalizelogin", headers=headers, files=files)
